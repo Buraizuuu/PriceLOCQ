@@ -73,7 +73,14 @@ export default class StationPage {
     }
 
     await this.applyFiltersButton.click();
-    await this.page.waitForTimeout(100);
+    await Promise.all([
+      this.page.waitForResponse(
+        (response) =>
+          response.url().includes("/ms-fleet/station") &&
+          response.status() === 200
+      ),
+    ]);
+    // await this.page.waitForTimeout(100);
     // await this.page.waitForTimeout(3000);
   }
 
