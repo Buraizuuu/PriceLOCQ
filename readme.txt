@@ -3,7 +3,7 @@ NodeJS : https://github.com/coreybutler/nvm-windows
 Playwright NodeJS : https://playwright.dev/docs/intro#installing-playwright
 Visual Studio Code IDE : https://code.visualstudio.com/
 
-//Installation Instructions
+//Installation Instructions - (Local) if you have the project folder file
 1. Download and install the latest Node.js.
 (Optional: I use Node Version Manager (nvm) to easily switch between Node versions.)
 2. Install Visual Studio Code as your IDE.
@@ -11,6 +11,11 @@ Visual Studio Code IDE : https://code.visualstudio.com/
 4. Open the integrated terminal inside VS Code by selecting View > Terminal (or press Ctrl+`).
 5. In the terminal, run the following command to install Playwright and initialize your testing setup:
 npm init playwright@latest
+
+//Cloning Project
+1. Open Visual Studio Code > Terminal
+2. Open the terminal and clone the project from GitHub by running: git clone https://github.com/Buraizuuu/PriceLOCQ.git
+3. After cloning, open Visual Studio Code, then open the PriceLOCQ folder via File > Open Folder.
 
 //To Run all script
 npx playwright test test
