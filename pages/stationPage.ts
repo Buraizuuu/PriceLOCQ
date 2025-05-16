@@ -73,7 +73,8 @@ export default class StationPage {
     }
 
     await this.applyFiltersButton.click();
-    await this.page.waitForTimeout(3000);
+    await this.page.waitForTimeout(100);
+    // await this.page.waitForTimeout(3000);
   }
 
   async getStationNames(): Promise<string[]> {
