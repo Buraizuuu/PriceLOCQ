@@ -1,4 +1,5 @@
 import { expect, Locator, Page } from "@playwright/test";
+
 export default class HomePage {
   readonly homeNav: Locator;
   readonly aboutUsNav: Locator;
@@ -28,14 +29,39 @@ export default class HomePage {
       .first();
   }
 
+  async verifyNavigationMenuVisibility() {
+    const checks = [
+      { name: "Home Nav", locator: this.homeNav },
+      { name: "About Us Nav", locator: this.aboutUsNav },
+      { name: "Getting Started Nav", locator: this.gettingStartedNav },
+      { name: "Help Center Nav", locator: this.helpCenterNav },
+    ];
+
+    for (const check of checks) {
+      const visible = await check.locator.isVisible();
+      if (visible) {
+        console.log(`✅ ${check.name} is visible`);
+      } else {
+        console.error(`❌ ${check.name} is NOT visible`);
+      }
+      expect(visible, `${check.name} should be visible`).toBe(true);
+    }
+  }
+
   async clickPaymentPartners() {
     await this.page.click("//div[@id='w-dropdown-toggle-1']");
     await this.page.click(
       "//nav[@id='w-dropdown-list-1']//a[text()='Payment Partners']"
     );
-    await expect(this.page).toHaveURL(
-      "https://www.pricelocq.com/payment-partners"
-    );
+    try {
+      await expect(this.page).toHaveURL(
+        "https://www.pricelocq.com/payment-partners"
+      );
+      console.log("✅ Navigated to Payment Partners page successfully");
+    } catch (error) {
+      console.error("❌ Navigation to Payment Partners page failed", error);
+      throw error; // re-throw so test still fails
+    }
   }
 
   async clickStationList() {
@@ -43,9 +69,15 @@ export default class HomePage {
     await this.page.click(
       "//nav[@id='w-dropdown-list-1']//a[text()='Station List']"
     );
-    await expect(this.page).toHaveURL(
-      "https://www.pricelocq.com/pricelocq-stations"
-    );
+    try {
+      await expect(this.page).toHaveURL(
+        "https://www.pricelocq.com/pricelocq-stations"
+      );
+      console.log("✅ Navigated to Station List page successfully");
+    } catch (error) {
+      console.error("❌ Navigation to Station List page failed", error);
+      throw error;
+    }
   }
 
   async clickLearnMore() {
@@ -56,6 +88,15 @@ export default class HomePage {
       ),
     ]);
     await newTab.waitForLoadState();
-    await expect(newTab).toHaveURL("https://sample-locq-site.webflow.io/");
+    try {
+      await expect(newTab).toHaveURL("https://sample-locq-site.webflow.io/");
+      console.log("✅ Navigated to Learn More page successfully (in new tab)");
+    } catch (error) {
+      console.error(
+        "❌ Navigation to Learn More page failed (in new tab)",
+        error
+      );
+      throw error;
+    }
   }
 }

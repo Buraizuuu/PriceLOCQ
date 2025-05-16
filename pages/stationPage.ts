@@ -1,5 +1,4 @@
 import { Page, Locator, expect } from "@playwright/test";
-
 export default class StationPage {
   readonly page: Page;
   readonly filtersButton: Locator;
@@ -14,6 +13,7 @@ export default class StationPage {
   readonly applyFiltersButton: Locator;
   readonly stationSearchField: Locator;
   readonly stationResults: Locator;
+  private productCheckboxes: Record<string, Locator>;
 
   constructor(page: Page) {
     this.page = page;
@@ -24,25 +24,24 @@ export default class StationPage {
     this.gas91Checkbox = page.locator('//span[text()="Gas 91"]/../..//input');
     this.gas95Checkbox = page.locator('//span[text()="Gas 95"]/../..//input');
     this.gas97Checkbox = page.locator('//span[text()="Gas 97"]/../..//input');
-    this.consumerCheckbox = page.locator(
-      '//p[text()="PriceLOCQ for Consumer"]/..//input'
-    );
-    this.businessCheckbox = page.locator(
-      '//p[text()="PriceLOCQ for Business"]/..//input'
-    );
-    this.applyFiltersButton = page.locator(
-      '//button[.//text()="Apply Filters"]'
-    );
+    this.consumerCheckbox = page.locator('//p[text()="PriceLOCQ for Consumer"]/..//input');
+    this.businessCheckbox = page.locator('//p[text()="PriceLOCQ for Business"]/..//input');
+    this.applyFiltersButton = page.locator('//button[.//text()="Apply Filters"]');
     this.stationSearchField = page.getByPlaceholder("Search station name");
     this.stationResults = page.locator(".station-list_stationLabel__1VCja");
+    this.productCheckboxes = {
+      "Diesel": this.dieselCheckbox,
+      "Gas 91": this.gas91Checkbox,
+      "Gas 95": this.gas95Checkbox,
+      "Gas 97": this.gas97Checkbox,
+    };
   }
 
-  async filterStations(
-    province: string,
-    city: string,
-    products: string[],
-    customerTypes: string[]
-  ) {
+  private cleanStationName(name: string): string {
+    return name.trim().replace(/Get Direction$/, "").trim();
+  }
+
+  async filterStations(province: string, city: string, products: string[], customerTypes: string[]) {
     await this.filtersButton.click();
     await this.provinceDropdown.fill(province);
     await this.page.keyboard.press("ArrowDown");
@@ -50,69 +49,32 @@ export default class StationPage {
     await this.cityDropdown.fill(city);
     await this.page.keyboard.press("ArrowDown");
     await this.page.keyboard.press("Enter");
-
     for (const product of products) {
-      switch (product) {
-        case "Diesel":
-          await this.dieselCheckbox.check();
-          break;
-        case "Gas 91":
-          await this.gas91Checkbox.check();
-          break;
-        case "Gas 95":
-          await this.gas95Checkbox.check();
-          break;
-        case "Gas 97":
-          await this.gas97Checkbox.check();
-          break;
-      }
+      const checkbox = this.productCheckboxes[product];
+      if (checkbox) await checkbox.check();
     }
-    for (const type of customerTypes) {
-      if (type === "Consumer") await this.consumerCheckbox.check();
-      if (type === "Business") await this.businessCheckbox.check();
-    }
-
+    if (customerTypes.includes("Consumer")) await this.consumerCheckbox.check();
+    if (customerTypes.includes("Business")) await this.businessCheckbox.check();
     await this.applyFiltersButton.click();
-    await Promise.all([
-      this.page.waitForResponse(
-        (response) =>
-          response.url().includes("/ms-fleet/station") &&
-          response.status() === 200
-      ),
-    ]);
-    // await this.page.waitForTimeout(100);
-    // await this.page.waitForTimeout(3000);
+    await this.page.waitForResponse((response) => response.url().includes("/ms-fleet/station") && response.status() === 200);
   }
 
   async getStationNames(): Promise<string[]> {
     await expect(this.stationResults.first()).toBeVisible();
     const stations = await this.stationResults.allTextContents();
-    const cleanedStations = stations
-      .map((name) =>
-        name
-          .trim()
-          .replace(/Get Direction$/, "")
-          .trim()
-      )
-      .filter(Boolean);
-
-    console.log(`Total stations found: ${cleanedStations.length}`);
-
-    return cleanedStations;
+    const cleaned = stations.map(this.cleanStationName).filter(Boolean);
+    console.log(`Total stations found: ${cleaned.length}`);
+    return cleaned;
   }
 
-  async getFirstTenStationNames(): Promise<string[]> {
-    await expect(this.stationResults.first()).toBeVisible();
-    const allStations = await this.stationResults.allTextContents();
-    const firstTen = allStations
-      .slice(0, 10)
-      .map((name) =>
-        name
-          .trim()
-          .replace(/Get Direction$/, "")
-          .trim()
-      )
-      .filter(Boolean);
-    return firstTen;
+async getFirstTenStationNames(): Promise<string[]> {
+  await expect(this.stationResults.first()).toBeVisible();
+  const allStations = await this.stationResults.allTextContents();
+
+  return allStations
+    .slice(0, 10)
+    .map((name, index) => `#${index + 1} ${this.cleanStationName(name)}`)
+    .filter(Boolean);
   }
+
 }
