@@ -3,6 +3,7 @@ import HomePage from "../pages/homepage";
 import paymentData from "../data/paymentPartners.json";
 
 test.describe.serial("Home Page Navigation Tests", () => {
+  
   test("Verify Home Page Navigation Menu Visibility", async ({ page }) => {
     const homePage = new HomePage(page);
     await page.goto("https://new.pricelocq.com/");

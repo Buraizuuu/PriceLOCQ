@@ -20,6 +20,8 @@ export default class PartnersPage {
 
     texts = texts.filter((text) => text.toLowerCase() !== "view stations >");
 
+    console.log("Filtered partner texts:", texts); // Console log added
+
     return texts;
   }
 }

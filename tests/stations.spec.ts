@@ -1,6 +1,11 @@
 import { test } from "@playwright/test";
 import StationPage from "../pages/stationPage";
 
+// Block the geolcation permission prompt
+test.use({
+  permissions: [], // Block all permissions including geolocation
+});
+
 test.describe.serial("Pricelocq Station Tests", () => {
   test("Find SEA OIL Stations", async ({ page }) => {
     const province = "Pangasinan";
