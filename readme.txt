@@ -26,8 +26,7 @@ npx playwright test tests/partners.spec.ts
 npx playwright test tests/stations.spec.ts
 
 //Challenges Encountered
--Maximizing screen during launched
+-Maximizing screen during browser launched
 -Encountered duplicate web objects, making it difficult to get unique results.
 -Dropdown menus disappear when inspecting elements, making it consistently hard to find and reliably target their XPath locators.
--Station names included unwanted extra text, such as "Get Direction," which complicated accurate data extraction.
 -Use of dynamic IDs made it challenging to create stable and consistent locators.
