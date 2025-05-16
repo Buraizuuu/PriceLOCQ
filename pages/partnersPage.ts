@@ -18,7 +18,6 @@ export default class PartnersPage {
         .trim()
     );
 
-    // Filter out any unwanted labels like "View stations >"
     texts = texts.filter((text) => text.toLowerCase() !== "view stations >");
 
     return texts;
