@@ -24,13 +24,19 @@ export default class StationPage {
     this.gas91Checkbox = page.locator('//span[text()="Gas 91"]/../..//input');
     this.gas95Checkbox = page.locator('//span[text()="Gas 95"]/../..//input');
     this.gas97Checkbox = page.locator('//span[text()="Gas 97"]/../..//input');
-    this.consumerCheckbox = page.locator('//p[text()="PriceLOCQ for Consumer"]/..//input');
-    this.businessCheckbox = page.locator('//p[text()="PriceLOCQ for Business"]/..//input');
-    this.applyFiltersButton = page.locator('//button[.//text()="Apply Filters"]');
+    this.consumerCheckbox = page.locator(
+      '//p[text()="PriceLOCQ for Consumer"]/..//input'
+    );
+    this.businessCheckbox = page.locator(
+      '//p[text()="PriceLOCQ for Business"]/..//input'
+    );
+    this.applyFiltersButton = page.locator(
+      '//button[.//text()="Apply Filters"]'
+    );
     this.stationSearchField = page.getByPlaceholder("Search station name");
     this.stationResults = page.locator(".station-list_stationLabel__1VCja");
     this.productCheckboxes = {
-      "Diesel": this.dieselCheckbox,
+      Diesel: this.dieselCheckbox,
       "Gas 91": this.gas91Checkbox,
       "Gas 95": this.gas95Checkbox,
       "Gas 97": this.gas97Checkbox,
@@ -38,10 +44,18 @@ export default class StationPage {
   }
 
   private cleanStationName(name: string): string {
-    return name.trim().replace(/Get Direction$/, "").trim();
+    return name
+      .trim()
+      .replace(/Get Direction$/, "")
+      .trim();
   }
 
-  async filterStations(province: string, city: string, products: string[], customerTypes: string[]) {
+  async filterStations(
+    province: string,
+    city: string,
+    products: string[],
+    customerTypes: string[]
+  ) {
     await this.filtersButton.click();
     await this.provinceDropdown.fill(province);
     await this.page.keyboard.press("ArrowDown");
@@ -56,25 +70,49 @@ export default class StationPage {
     if (customerTypes.includes("Consumer")) await this.consumerCheckbox.check();
     if (customerTypes.includes("Business")) await this.businessCheckbox.check();
     await this.applyFiltersButton.click();
-    await this.page.waitForResponse((response) => response.url().includes("/ms-fleet/station") && response.status() === 200);
+    await this.page.waitForResponse(
+      (response) =>
+        response.url().includes("/ms-fleet/station") &&
+        response.status() === 200
+    );
   }
 
   async getStationNames(): Promise<string[]> {
-    await expect(this.stationResults.first()).toBeVisible();
-    const stations = await this.stationResults.allTextContents();
-    const cleaned = stations.map(this.cleanStationName).filter(Boolean);
+    const stationElements = await this.stationResults.elementHandles();
+    const cleaned: string[] = [];
+
+    for (const el of stationElements) {
+      const name = await el.evaluate((node) => {
+        const childNodes = Array.from(node.childNodes);
+        const textNode = childNodes.find((n) => n.nodeType === Node.TEXT_NODE);
+        return textNode?.textContent?.trim() || "";
+      });
+
+      if (name) cleaned.push(name);
+    }
+
     console.log(`Total stations found: ${cleaned.length}`);
     return cleaned;
   }
 
-async getFirstTenStationNames(): Promise<string[]> {
-  await expect(this.stationResults.first()).toBeVisible();
-  const allStations = await this.stationResults.allTextContents();
+  async getFirstTenStationNames(): Promise<string[]> {
+    const stationElements = (await this.stationResults.elementHandles()).slice(
+      0,
+      10
+    );
+    const cleaned: string[] = [];
 
-  return allStations
-    .slice(0, 10)
-    .map((name, index) => `#${index + 1} ${this.cleanStationName(name)}`)
-    .filter(Boolean);
+    for (let i = 0; i < stationElements.length; i++) {
+      const el = stationElements[i];
+      const name = await el.evaluate((node) => {
+        const childNodes = Array.from(node.childNodes);
+        const textNode = childNodes.find((n) => n.nodeType === Node.TEXT_NODE);
+        return textNode?.textContent?.trim() || "";
+      });
+
+      if (name) cleaned.push(`#${i + 1} ${name}`);
+    }
+
+    return cleaned;
   }
-
 }
