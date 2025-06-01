@@ -1,4 +1,5 @@
 import { expect, Locator, Page } from "@playwright/test";
+import URLS from "../config/urls";
 
 export default class HomePage {
   readonly homeNav: Locator;
@@ -8,24 +9,16 @@ export default class HomePage {
 
   constructor(public page: Page) {
     this.homeNav = page
-      .locator(
-        "//a[@href='https://new.pricelocq.com/' and normalize-space(text())='Home']"
-      )
+      .locator(`//a[@href='${URLS.HOME}' and normalize-space(text())='Home']`)
       .first();
     this.aboutUsNav = page
-      .locator(
-        "//a[@href='https://www.pricelocq.com/about-us' and normalize-space(text())='About us']"
-      )
+      .locator(`//a[@href='${URLS.ABOUT_US}' and normalize-space(text())='About us']`)
       .first();
     this.gettingStartedNav = page
-      .locator(
-        "//a[@href='https://www.pricelocq.com/getting-started' and normalize-space(text())='Get started']"
-      )
+      .locator(`//a[@href='${URLS.GETTING_STARTED}' and normalize-space(text())='Get started']`)
       .first();
     this.helpCenterNav = page
-      .locator(
-        "//a[@href='https://help.pricelocq.com/support/home' and normalize-space(text())='Help Center']"
-      )
+      .locator(`//a[@href='${URLS.HELP_CENTER}' and normalize-space(text())='Help Center']`)
       .first();
   }
 
